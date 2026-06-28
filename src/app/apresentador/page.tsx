@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 
 interface Team {
@@ -54,6 +54,8 @@ export default function ApresentadorPage() {
   } | null>(null);
   const [isPagaChallenge, setIsPagaChallenge] = useState(false);
   const [nextCountdown, setNextCountdown] = useState<number | null>(null);
+  const usedQuestionIds = useRef(new Set<number>());
+  const usedChallengeIds = useRef(new Set<number>());
 
   useEffect(() => {
     if (errorMsg) {
@@ -102,6 +104,8 @@ export default function ApresentadorPage() {
         setQuestionTurn(null);
         setNextTeamIndex(0);
         setIsPagaChallenge(false);
+        usedQuestionIds.current.clear();
+        usedChallengeIds.current.clear();
       } else {
         setErrorMsg("Erro ao criar partida. Tente novamente.");
       }
@@ -112,6 +116,15 @@ export default function ApresentadorPage() {
     }
   }, []);
 
+  function shuffle<T>(arr: T[]): T[] {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
   async function pickQuestion() {
     setErrorMsg("");
     try {
@@ -119,7 +132,14 @@ export default function ApresentadorPage() {
       if (!res.ok) { setErrorMsg("Erro ao carregar perguntas"); return; }
       const data = await res.json();
       if (data.questions?.length > 0) {
-        const q: Question = data.questions[Math.floor(Math.random() * data.questions.length)];
+        let available: Question[] = data.questions.filter((q: Question) => !usedQuestionIds.current.has(q.id));
+        if (available.length === 0) {
+          usedQuestionIds.current.clear();
+          available = data.questions;
+        }
+        const shuffled = shuffle(available);
+        const q = shuffled[0];
+        usedQuestionIds.current.add(q.id);
         const teamIdx = nextTeamIndex % teams.length;
         setNextTeamIndex((prev) => (prev + 1) % teams.length);
         setCurrentContent({ type: "question", data: q });
@@ -158,7 +178,14 @@ export default function ApresentadorPage() {
       if (!res.ok) { setErrorMsg("Erro ao carregar provas"); return; }
       const data = await res.json();
       if (data.challenges?.length > 0) {
-        const c: Challenge = data.challenges[Math.floor(Math.random() * data.challenges.length)];
+        let available: Challenge[] = data.challenges.filter((c: Challenge) => !usedChallengeIds.current.has(c.id));
+        if (available.length === 0) {
+          usedChallengeIds.current.clear();
+          available = data.challenges;
+        }
+        const shuffled = shuffle(available);
+        const c = shuffled[0];
+        usedChallengeIds.current.add(c.id);
         setCurrentContent({ type: "challenge", data: c });
         if (gameCode) {
           await sendAction("CHALLENGE", {
@@ -245,7 +272,14 @@ export default function ApresentadorPage() {
       if (!res.ok) { setErrorMsg("Erro ao carregar provas"); return; }
       const data = await res.json();
       if (data.challenges?.length > 0) {
-        const c: Challenge = data.challenges[Math.floor(Math.random() * data.challenges.length)];
+        let available: Challenge[] = data.challenges.filter((c: Challenge) => !usedChallengeIds.current.has(c.id));
+        if (available.length === 0) {
+          usedChallengeIds.current.clear();
+          available = data.challenges;
+        }
+        const shuffled = shuffle(available);
+        const c = shuffled[0];
+        usedChallengeIds.current.add(c.id);
         setCurrentContent({ type: "challenge", data: c });
         if (gameCode) {
           await sendAction("PAY", {
