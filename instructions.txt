@@ -1,0 +1,627 @@
+Antes de começar crie o Agents.md com as regras de desenvolvimento. Faça o log de todas as alterações que forem realizadas e implantadas na pasta logs dentro da pasta docs. Na pasta docs crie arquivos de documentação devidamente formatados e como operar o sistema e nessa mesma pasta crie documentações de como subir uma versão local e como subir esse sistema para a Vercel de forma gratuita. Na raiz do sistema crie um readme completo para documentação do sistema. 
+
+# Projeto: Passa ou Repassa Web - Next.js + SQLite (Versão Completa com Área Administrativa)
+
+Criar uma aplicação web inspirada no programa Passa ou Repassa, com:
+
+- Tela do Apresentador
+- Tela Telão
+- Sistema de partidas
+- Banco de perguntas
+- Banco de provas do PAGA
+- Área administrativa protegida por e-mail e senha
+
+
+Tecnologias:
+
+- Next.js (App Router)
+- React
+- TypeScript
+- Tailwind CSS
+- Prisma ORM
+- SQLite
+- Autenticação com NextAuth ou sistema próprio com JWT
+- bcrypt para criptografia de senha
+
+
+---
+
+# Estrutura do sistema
+
+A aplicação terá três ambientes:
+
+
+## 1 - Apresentador
+
+Responsável pelo controle do jogo.
+
+
+## 2 - Telão
+
+Tela pública para jogadores.
+
+
+## 3 - Administrativo
+
+Área restrita para gerenciamento de conteúdo.
+
+
+---
+
+# SISTEMA ADMINISTRATIVO
+
+
+Criar uma rota:
+
+
+/admin
+
+
+Essa área deve exigir login.
+
+
+Login:
+
+Email:
+
+Senha:
+
+
+Exemplo:
+
+admin@jogo.com
+
+********
+
+
+Após autenticação liberar:
+
+
+Dashboard Administrativo
+
+
+---
+
+# Banco de usuários administradores
+
+
+Criar tabela:
+
+
+## UserAdmin
+
+
+Campos:
+
+
+id
+
+nome
+
+email
+
+passwordHash
+
+createdAt
+
+updatedAt
+
+
+Regras:
+
+
+- Senha nunca deve ser salva em texto puro
+- Usar bcrypt
+- Sessão protegida
+- Bloquear acesso sem autenticação
+
+
+---
+
+# Dashboard Administrativo
+
+
+Criar painel contendo:
+
+
+Cards:
+
+
+Total de perguntas
+
+Total de provas
+
+Partidas realizadas
+
+
+Menu:
+
+
+- Gerenciar Perguntas
+- Gerenciar Provas do Paga
+- Usuários Administradores
+- Configurações
+
+
+---
+
+# GERENCIAMENTO DE PERGUNTAS
+
+
+Criar CRUD completo.
+
+
+Funções:
+
+
+## Adicionar pergunta
+
+
+Campos:
+
+
+Pergunta:
+
+Resposta correta:
+
+Categoria:
+
+Nível:
+
+Pontuação:
+
+
+
+Exemplo:
+
+
+Pergunta:
+
+"Qual é o maior planeta do sistema solar?"
+
+
+Resposta:
+
+"Júpiter"
+
+
+Categoria:
+
+Ciências
+
+
+Nível:
+
+Fácil
+
+
+Pontos:
+
+10
+
+
+
+---
+
+## Editar pergunta
+
+
+Permitir alterar:
+
+
+- Texto
+- Resposta
+- Categoria
+- Dificuldade
+- Pontuação
+
+
+---
+
+## Remover pergunta
+
+
+Adicionar confirmação:
+
+
+"Tem certeza que deseja excluir essa pergunta?"
+
+
+---
+
+## Filtros
+
+
+Permitir:
+
+
+Buscar por texto
+
+
+Filtrar por:
+
+Categoria
+
+Nível
+
+
+---
+
+# Importação de perguntas
+
+
+Criar opção:
+
+Importar perguntas
+
+
+Aceitar:
+
+CSV
+
+JSON
+
+
+Exemplo CSV:
+
+
+pergunta,resposta,categoria,nivel,pontos
+
+
+---
+
+# GERENCIAMENTO DAS PROVAS DO PAGA
+
+
+Criar CRUD completo.
+
+
+Menu:
+
+
+/admin/provas
+
+
+Permitir:
+
+
+Adicionar prova
+
+Editar prova
+
+Excluir prova
+
+
+---
+
+Campos da prova:
+
+
+Nome:
+
+
+Descrição:
+
+
+Categoria:
+
+
+Tempo:
+
+
+Dificuldade:
+
+
+Instrução:
+
+
+Exemplo:
+
+
+Nome:
+
+Boca do Palhaço
+
+
+Descrição:
+
+Acertar bolas dentro da boca do palhaço.
+
+
+Tempo:
+
+30 segundos
+
+
+Categoria:
+
+Habilidade
+
+
+Dificuldade:
+
+Fácil
+
+
+
+---
+
+# Banco inicial de provas
+
+
+Criar seed com:
+
+
+100 provas cadastradas.
+
+
+Categorias:
+
+
+- Habilidade
+- Equilíbrio
+- Memória
+- Conhecimento
+- Coordenação
+- Humor
+
+
+---
+
+# Controle de permissões
+
+
+Administrador:
+
+
+Pode:
+
+Criar perguntas
+
+Excluir perguntas
+
+Criar provas
+
+Excluir provas
+
+Gerenciar usuários
+
+
+
+Apresentador:
+
+
+Somente joga.
+
+
+Não acessa administração.
+
+
+---
+
+# Banco de dados Prisma
+
+
+Adicionar:
+
+
+## UserAdmin
+
+id
+
+nome
+
+email
+
+passwordHash
+
+createdAt
+
+
+---
+
+## Question
+
+
+id
+
+pergunta
+
+resposta
+
+categoria
+
+nivel
+
+pontos
+
+createdAt
+
+
+
+---
+
+## Challenge
+
+
+id
+
+nome
+
+descricao
+
+categoria
+
+tempo
+
+nivel
+
+instrucao
+
+createdAt
+
+
+
+---
+
+## Game
+
+
+id
+
+codigo
+
+status
+
+createdAt
+
+
+
+---
+
+## Team
+
+
+id
+
+gameId
+
+nome
+
+cor
+
+pontos
+
+
+
+---
+
+## GameAction
+
+
+id
+
+gameId
+
+tipo
+
+dados
+
+createdAt
+
+
+Tipos:
+
+
+QUESTION
+
+ANSWER
+
+PASS
+
+REPASS
+
+PAY
+
+CHALLENGE
+
+
+
+---
+
+# Segurança
+
+
+Implementar:
+
+
+- Middleware protegendo /admin
+- Redirecionamento para login
+- Logout
+- Sessão persistente
+- Validação de formulário
+- Tratamento de erros
+
+
+---
+
+# Tela administrativa
+
+
+Criar interface profissional:
+
+
+Sidebar:
+
+
+🎮 Jogo
+
+❓ Perguntas
+
+🎯 Provas
+
+👤 Usuários
+
+
+Área principal:
+
+Tabelas com:
+
+
+- Dados
+- Editar
+- Excluir
+
+
+Adicionar:
+
+- Paginação
+- Busca
+- Filtros
+
+
+---
+
+# Objetivo final
+
+
+Criar uma plataforma completa de Passa ou Repassa:
+
+Usuário administrador gerencia:
+
+✅ Perguntas
+
+✅ Respostas
+
+✅ Categorias
+
+✅ Dificuldades
+
+✅ Pontuações
+
+✅ Provas do Paga
+
+
+Apresentador controla:
+
+✅ Partidas
+
+✅ Passa
+
+✅ Repassa
+
+✅ Paga
+
+
+Jogadores acompanham:
+
+✅ Telão
+
+✅ Perguntas
+
+✅ Placar
+
+✅ Desafios
+
+
+Sistema pronto para eventos, escolas e competições.
