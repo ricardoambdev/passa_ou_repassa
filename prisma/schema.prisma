@@ -62,6 +62,12 @@ model TeamConfig {
   ordem Int    @default(0)
 }
 
+model SystemConfig {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String
+}
+
 model GameAction {
   id        Int      @id @default(autoincrement())
   gameId    Int

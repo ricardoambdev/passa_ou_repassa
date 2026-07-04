@@ -15,14 +15,28 @@ export default function AdminLayout({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/auth/me")
-      .then((res) => {
+    async function check() {
+      try {
+        const magicRes = await fetch("/api/auth/check-magic");
+        if (magicRes.ok) {
+          setUser({ nome: "Administrador", email: "magic" });
+          setLoading(false);
+          return;
+        }
+      } catch {}
+
+      try {
+        const res = await fetch("/api/auth/me");
         if (!res.ok) throw new Error("Not authenticated");
-        return res.json();
-      })
-      .then((data) => setUser(data.user))
-      .catch(() => router.push("/admin/login"))
-      .finally(() => setLoading(false));
+        const data = await res.json();
+        setUser(data.user);
+      } catch {
+        router.push("/admin/login");
+      } finally {
+        setLoading(false);
+      }
+    }
+    check();
   }, [router]);
 
   async function handleLogout() {

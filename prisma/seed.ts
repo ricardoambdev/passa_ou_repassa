@@ -701,6 +701,16 @@ async function main() {
     console.log(`${existingTeams} times já existem. Pulando...`);
   }
 
+  const existingMagic = await prisma.systemConfig.findUnique({ where: { key: "magic_word" } });
+  if (!existingMagic) {
+    await prisma.systemConfig.create({
+      data: { key: "magic_word", value: "parangaricutirimirruaru" },
+    });
+    console.log('Palavra cabalística padrão criada!');
+  } else {
+    console.log('Palavra cabalística já existe. Pulando...');
+  }
+
   console.log("Seed concluído!");
 }
 

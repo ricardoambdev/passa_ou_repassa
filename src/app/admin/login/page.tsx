@@ -1,34 +1,57 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [word, setWord] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+  const [showEmailLogin, setShowEmailLogin] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleMagicSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
+    try {
+      const res = await fetch("/api/auth/check-magic", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ word }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Palavra incorreta");
+        return;
+      }
+      setRedirecting(true);
+      setTimeout(() => { window.location.href = "/admin"; }, 2000);
+    } catch {
+      setError("Erro de conexão");
+    } finally {
+      setLoading(false);
+    }
+  }
 
+  async function handleEmailSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || "Erro ao fazer login");
         return;
       }
-
-      router.push("/admin");
+      setRedirecting(true);
+      setTimeout(() => { window.location.href = "/admin"; }, 2000);
     } catch {
       setError("Erro de conexão");
     } finally {
@@ -46,49 +69,103 @@ export default function LoginPage() {
             <p className="text-zinc-500 font-display mt-1">Área Administrativa</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block font-display text-zinc-600 mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-orange-50 text-zinc-800 border-2 border-orange-200 focus:border-coral focus:outline-none font-body"
-                placeholder="admin@jogo.com"
-                required
-              />
+          {redirecting ? (
+            <div className="text-center py-8">
+              <div className="text-6xl mb-4 animate-bounce">🎪</div>
+              <p className="text-xl font-display text-coral">Redirecionando...</p>
+              <p className="text-zinc-400 font-display text-sm mt-2">Aguarde um instante</p>
             </div>
-
-            <div>
-              <label className="block font-display text-zinc-600 mb-1">
-                Senha
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-orange-50 text-zinc-800 border-2 border-orange-200 focus:border-coral focus:outline-none font-body"
-                placeholder="********"
-                required
-              />
-            </div>
-
-            {error && (
-              <div className="bg-red-100 text-red-600 px-4 py-3 rounded-xl font-display text-sm border-2 border-red-200">
-                😅 {error}
+          ) : !showEmailLogin ? (
+            <form onSubmit={handleMagicSubmit} className="space-y-5">
+              <div>
+                <label className="block font-display text-zinc-600 mb-1">
+                  Palavra Cabalística
+                </label>
+                <input
+                  type="text"
+                  value={word}
+                  onChange={(e) => setWord(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-orange-50 text-zinc-800 border-2 border-orange-200 focus:border-coral focus:outline-none font-body"
+                  placeholder="Digite a palavra secreta..."
+                  required
+                />
               </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-fun w-full py-4 bg-coral text-white border-coral/80 hover:bg-coral/90 text-xl disabled:opacity-50"
-            >
-              {loading ? "Entrando..." : "🎬 Entrar"}
-            </button>
-          </form>
+              {error && (
+                <div className="bg-red-100 text-red-600 px-4 py-3 rounded-xl font-display text-sm border-2 border-red-200">
+                  😅 {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-fun w-full py-4 bg-coral text-white border-coral/80 hover:bg-coral/90 text-xl disabled:opacity-50"
+              >
+                {loading ? "Entrando..." : "🎬 Entrar"}
+              </button>
+
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => { setShowEmailLogin(true); setError(""); }}
+                  className="text-zinc-400 hover:text-coral font-display text-sm transition-colors"
+                >
+                  Entrar com email e senha
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleEmailSubmit} className="space-y-5">
+              <div>
+                <label className="block font-display text-zinc-600 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-orange-50 text-zinc-800 border-2 border-orange-200 focus:border-coral focus:outline-none font-body"
+                  placeholder="admin@jogo.com"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block font-display text-zinc-600 mb-1">Senha</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-orange-50 text-zinc-800 border-2 border-orange-200 focus:border-coral focus:outline-none font-body"
+                  placeholder="********"
+                  required
+                />
+              </div>
+
+              {error && (
+                <div className="bg-red-100 text-red-600 px-4 py-3 rounded-xl font-display text-sm border-2 border-red-200">
+                  😅 {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-fun w-full py-4 bg-coral text-white border-coral/80 hover:bg-coral/90 text-xl disabled:opacity-50"
+              >
+                {loading ? "Entrando..." : "🎬 Entrar"}
+              </button>
+
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => { setShowEmailLogin(false); setError(""); }}
+                  className="text-zinc-400 hover:text-coral font-display text-sm transition-colors"
+                >
+                  Voltar para palavra cabalística
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     </div>

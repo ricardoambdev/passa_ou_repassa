@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
+async function getMagicWord() {
+  const config = await prisma.systemConfig.findUnique({ where: { key: "magic_word" } });
+  return config?.value || "parangaricutirimirruaru";
+}
 
 export async function POST(request: Request) {
   const { word } = await request.json();
-  const magicWord = process.env.MAGIC_WORD || "parangaricutirimirruaru";
+  const magicWord = await getMagicWord();
 
   if (word?.toLowerCase() !== magicWord.toLowerCase()) {
     return NextResponse.json({ ok: false, error: "Palavra incorreta" }, { status: 401 });
@@ -33,7 +39,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ valid: false }, { status: 401 });
   }
 
-  const magicWord = process.env.MAGIC_WORD || "parangaricutirimirruaru";
+  const magicWord = await getMagicWord();
   try {
     const decoded = Buffer.from(token, "base64").toString("utf-8");
     if (decoded.endsWith(magicWord)) {
