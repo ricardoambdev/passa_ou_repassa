@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -28,7 +27,8 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/admin");
+      setRedirecting(true);
+      setTimeout(() => { window.location.href = "/admin"; }, 2000);
     } catch {
       setError("Erro de conexão");
     } finally {
@@ -46,6 +46,13 @@ export default function LoginPage() {
             <p className="text-zinc-500 font-display mt-1">Área Administrativa</p>
           </div>
 
+          {redirecting ? (
+            <div className="text-center py-8">
+              <div className="text-6xl mb-4 animate-bounce">🎪</div>
+              <p className="text-xl font-display text-coral">Redirecionando...</p>
+              <p className="text-zinc-400 font-display text-sm mt-2">Aguarde um instante</p>
+            </div>
+          ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block font-display text-zinc-600 mb-1">
@@ -89,6 +96,7 @@ export default function LoginPage() {
               {loading ? "Entrando..." : "🎬 Entrar"}
             </button>
           </form>
+          )}
         </div>
       </div>
     </div>
