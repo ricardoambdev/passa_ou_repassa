@@ -1,65 +1,35 @@
-# Deploy no Render + Turso
+# Deploy na Vercel
 
-O Render (free tier) não suporta discos persistentes, então usamos **Turso** — SQLite na edge, grátis.
+O banco Turso já está criado e populado. Basta conectar na Vercel.
 
-## 1. Criar banco no Turso
-
-```bash
-# Instalar CLI do Turso
-npm install -g turso
-
-# Logar
-turso auth login
-
-# Criar banco
-turso db create passa-ou-repassa-db
-
-# Pegar a URL de conexão
-turso db show passa-ou-repassa-db --url
-
-# Gerar token de autenticação
-turso db tokens create passa-ou-repassa-db
-```
-
-Anote a URL (começa com `libsql://...`) e o token gerado.
-
-## 2. Seed do banco
+## 1. Fazer push no GitHub
 
 ```bash
-# Rodar localmente apontando pro Turso
-DATABASE_URL="libsql://..." TURSO_AUTH_TOKEN="..." npx tsx prisma/seed.ts
+git push origin master
 ```
 
-## 3. Conectar o repositório no Render
+## 2. Importar na Vercel
 
-1. Faça push do projeto para o GitHub
-2. [Dashboard do Render](https://dashboard.render.com) → **New +** → **Blueprint**
-3. Conecte seu GitHub e selecione o repositório
-4. O Render lê o `render.yaml`
-
-## 4. Preencher variáveis de ambiente
-
-No Dashboard do Render, antes de aplicar:
+1. Acesse https://vercel.com/new
+2. Importe o repositório `passa_ou_repassa`
+3. Em **Environment Variables**, adicione:
 
 | Variável | Valor |
 |----------|-------|
-| `DATABASE_URL` | URL do Turso (`libsql://...`) |
-| `TURSO_AUTH_TOKEN` | Token gerado no Turso |
-| `JWT_SECRET` | Qualquer string aleatória |
+| `DATABASE_URL` | `libsql://passa-ou-repassa-db-ricardoambdev.aws-us-east-2.turso.io` |
+| `TURSO_AUTH_TOKEN` | token gerado no Turso |
+| `JWT_SECRET` | uma string segura qualquer |
 
-## 5. Aplicar
+4. Clique **Deploy**
 
-Clique **"Apply"**. O Render vai buildar e iniciar o servidor.
+## 3. Primeiro acesso
 
-## 6. Primeiro acesso
-
-1. Acessar `https://passa-ou-repassa.onrender.com/admin`
-2. Login: `admin@jogo.com` / `admin123` (criado pelo seed)
+1. Acessar `https://seu-site.vercel.app/admin`
+2. Login: `admin@jogo.com` / `admin123`
 3. Em Configurações, definir a Palavra Cabalística
 
 ## Importante
 
-- O banco fica no Turso (nuvem), não no disco do Render
-- Dados persistem mesmo resetando o deploy
-- Plano gratuito do Turso: 500MB, 1 bucket, sem limite de requests
-- Plano gratuito do Render: sempre ligado, sem limite de horas
+- O banco fica no Turso, os dados persistem entre deploys
+- Plano gratuito da Vercel: 100h/mês de execução
+- Para uso contínuo sem limite, upgrade pro Pro ($20/mês)
