@@ -6,12 +6,10 @@ services:
     buildCommand: npm install && npm run build
     startCommand: npx next start --port $PORT
     healthCheckPath: /
-    disk:
-      name: sqlite-data
-      mountPath: /data
-      sizeGB: 1
     envVars:
       - key: DATABASE_URL
-        value: file:/data/dev.db
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
       - key: JWT_SECRET
         sync: false

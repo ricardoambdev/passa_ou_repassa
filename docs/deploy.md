@@ -1,38 +1,57 @@
-# Deploy no Render (Recomendado)
+# Deploy no Render + Turso
 
-O Render suporta SQLite com disco persistente — **zero mudanças no código**.
+O Render (free tier) não suporta discos persistentes, então usamos **Turso** — SQLite na edge, grátis.
 
-## 1. Pré-requisitos
+## 1. Criar banco no Turso
 
-- Conta no [Render](https://render.com) (plano gratuito)
-- Repositório no [GitHub](https://github.com)
+```bash
+# Instalar CLI do Turso
+npm install -g turso
 
-## 2. Conectar o repositório
+# Logar
+turso auth login
+
+# Criar banco
+turso db create passa-ou-repassa-db
+
+# Pegar a URL de conexão
+turso db show passa-ou-repassa-db --url
+
+# Gerar token de autenticação
+turso db tokens create passa-ou-repassa-db
+```
+
+Anote a URL (começa com `libsql://...`) e o token gerado.
+
+## 2. Seed do banco
+
+```bash
+# Rodar localmente apontando pro Turso
+DATABASE_URL="libsql://..." TURSO_AUTH_TOKEN="..." npx tsx prisma/seed.ts
+```
+
+## 3. Conectar o repositório no Render
 
 1. Faça push do projeto para o GitHub
-2. No [Dashboard do Render](https://dashboard.render.com), clique em **"New +"** → **"Blueprint"**
-3. Conecte seu GitHub e selecione o repositório `passa_ou_repassa`
-4. O Render lê o `render.yaml` e configura tudo automaticamente
+2. [Dashboard do Render](https://dashboard.render.com) → **New +** → **Blueprint**
+3. Conecte seu GitHub e selecione o repositório
+4. O Render lê o `render.yaml`
 
-## 3. Variáveis de ambiente
+## 4. Preencher variáveis de ambiente
 
-No Dashboard, antes de aplicar o Blueprint, preencha:
+No Dashboard do Render, antes de aplicar:
 
-| Variável | Descrição |
-|----------|-----------|
-| `JWT_SECRET` | Chave secreta (ex: gere uma senha aleatória) |
+| Variável | Valor |
+|----------|-------|
+| `DATABASE_URL` | URL do Turso (`libsql://...`) |
+| `TURSO_AUTH_TOKEN` | Token gerado no Turso |
+| `JWT_SECRET` | Qualquer string aleatória |
 
-A `DATABASE_URL` já vai configurada pelo `render.yaml` — aponta pro disco persistente.
+## 5. Aplicar
 
-## 4. Aplicar
+Clique **"Apply"**. O Render vai buildar e iniciar o servidor.
 
-Clique **"Apply"**. O Render vai:
-1. Criar o disco de 1GB para o SQLite
-2. Buildar o projeto (`npm install && npm run build`)
-3. Rodar o seed automático (via `prisma/seed.ts`)
-4. Iniciar o servidor
-
-## 5. Primeiro acesso
+## 6. Primeiro acesso
 
 1. Acessar `https://passa-ou-repassa.onrender.com/admin`
 2. Login: `admin@jogo.com` / `admin123` (criado pelo seed)
@@ -40,7 +59,7 @@ Clique **"Apply"**. O Render vai:
 
 ## Importante
 
-- O banco SQLite fica no disco persistente (`/data/dev.db`)
-- Se resetar o deploy, os dados **não** são perdidos (disco persiste)
-- Para resetar o banco, acesse o Shell do Render e rode `npx tsx prisma/seed.ts`
-- Plano gratuito é sempre ligado (sem limite de horas)
+- O banco fica no Turso (nuvem), não no disco do Render
+- Dados persistem mesmo resetando o deploy
+- Plano gratuito do Turso: 500MB, 1 bucket, sem limite de requests
+- Plano gratuito do Render: sempre ligado, sem limite de horas
