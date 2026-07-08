@@ -1,41 +1,49 @@
-# Como Subir Versão Local
+# Instalação Local
 
 ## Pré-requisitos
+
 - Node.js 18+
 - npm
 
 ## Passos
 
 ```bash
-# 1. Instalar dependências
+# 1. Clonar
+git clone https://github.com/ricardoambdev/passa_ou_repassa.git
+cd passa_ou_repassa
+
+# 2. Instalar dependências
 npm install
 
-# 2. Configurar variáveis de ambiente
-# Editar .env:
+# 3. Configurar .env
+# Editar .env na raiz do projeto:
 DATABASE_URL="file:./dev.db"
 JWT_SECRET="sua-chave-secreta-aqui"
-MAGIC_WORD="parangaricutirimirruaru"
 
-# 3. Sincronizar banco de dados
-npx prisma db push
-
-# 4. Executar seed (admin + 100 provas)
-npx tsx prisma/seed.ts
-
-# 5. Iniciar servidor de desenvolvimento
+# 4. Iniciar servidor
 npm run dev
-
-# 6. Acessar
-# http://localhost:3000
 ```
 
-## Build de Produção Local
+O `dev.db` já vem com o repositório — admin, perguntas, provas e palavra cabalística já estão prontos.
+
+## Acessar
+
+- **http://localhost:3000** — Página inicial
+- **http://localhost:3000/admin** — Admin (login: `admin@jogo.com` / `admin123`)
+- **http://localhost:3000/apresentador** — Apresentador
+- **http://localhost:3000/telao** — Telão
+
+## Se quiser resetar o banco
+
+```bash
+rm dev.db
+npx prisma db push
+npx tsx prisma/seed.ts
+```
+
+## Build de produção local
 
 ```bash
 npm run build
 npm start
 ```
-
-## Credenciais Padrão
-- Email: `admin@jogo.com`
-- Senha: `admin123`
